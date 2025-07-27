@@ -83,27 +83,24 @@ def get_doc_tools(file_path: str, name: str, embed_model: OpenAIEmbedding, datas
             filters.append({"key": "file_name", "value": file_name})
 
         query_engine = vector_index.as_query_engine(similarity_top_k=5,
-                                                    filters=MetadataFilters.from_dicts(filters),
-                                                    )
+                                                    filters=MetadataFilters.from_dicts(filters))
+        
         return query_engine.query(f"Find relevant citations: {query}")
 
     vector_tool = FunctionTool.from_defaults(fn=vector_query,
                                              name=f"vector_tool_{name}",
-                                             description=f"Vector-based search over {name} with optional page filter."
-                                             )
+                                             description=f"Vector-based search over {name} with optional page filter.")
 
     summary_query_engine = summary_index.as_query_engine(response_mode="tree_summarize",
                                                          use_async=True)
 
     summary_tool = QueryEngineTool.from_defaults(query_engine=summary_query_engine,
                                                  name=f"summary_tool_{name}",
-                                                 description=f"Summarize the content of {name}."
-                                                 )
+                                                 description=f"Summarize the content of {name}.")
 
     citation_tool = FunctionTool.from_defaults(fn=citation_search,
                                                name=f"citation_tool_{name}",
-                                               description="Search the paper for relevant citations and prior work mentioned across all sections, including Related Work."
-                                               )
+                                               description="Search the paper for relevant citations and prior work mentioned across all sections, including Related Work.")
 
     return vector_tool, summary_tool, citation_tool
 
